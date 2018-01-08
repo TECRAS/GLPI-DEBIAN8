@@ -1,0 +1,105 @@
+
+# CENTRAL DE SERVIÇOS  COM SOFTWARE LIVRE 
+
+# ESTRUTURANDO UMA CENTRAL DE SERVIÇOS COM O GLPI
+
+# CONFIGURANDO REPOSITÓRIOS 
+
+echo "deb http://security.debian.org/debian-security jessie/updates main" > /etc/apt/sources.list
+echo "deb http://ftp.de.debian.org/debian/ jessie main" >> /etc/apt/sources.list
+echo "deb http://ftp.br.debian.org/debian/ jessie main contrib non-free" >> /etc/apt/sources.list
+#
+ATUALIZANDO REPOSITÓRIOS
+#
+apt-get update
+#
+# ATUALIZANDO OS PACOTES
+#
+apt-get upgrade -y
+
+#REPOSITÓRIOS MARIADB
+#
+apt-get install software-properties-common
+apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xcbcb082a1bb943db
+add-apt-repository 'deb [arch=amd64,i386] http://mirror.ufscar.br/mariadb/repo/10.1/debian jessie main'
+apt-get update
+#
+#INSTALANDO OS PACOTES NECESSARIOS PARA A EXECUÇÃO DO GLPI
+#
+apt-get install ca-certificates apache2 libapache2-mod-php5 php5-cli php5 php5-gd php5-imap php5-ldap php5-mysql php-soap php5-xmlrpc mariadb-server -y
+#
+apt-get install zip unzip bzip2 unrar-free -y
+#
+#INSTALANDO O GLPI
+#
+#DIRETÓRIO PARA BAIXA O GLPI
+#
+cd /opt
+#
+wget -c https://github.com/glpi-project/glpi/releases/download/0.90.1/glpi-0.90.1.tar.gz
+#
+tar -zxf glpi-0.90.1.tar.gz
+#
+#MOVENDO GLPI /VAR/WWW/HTML/
+#
+mv glpi /var/www/html/
+#
+#
+ALTERANDO O DONO E O GRUPO DO ARQUIVO
+#
+chown www-data:www-data /var/www/html/ -Rf
+#
+#ALTERANDO AS PERMISSÕES O DIRETÓRIO
+chmod 775 /var/www/html/ -Rf
+#
+#CONFIGURAÇÕES ESPECIFICAS  PARA O SISTEMA GLPI DENTRO DO APACHE
+#
+vim /etc/apache2/conf-available/glpi.conf
+#
+<Directory "/var/www/html/glpi">
+	AllowOverride All
+</Directory>
+#
+# HABILITANDO O SITE
+#
+a2enconf glpi.conf
+#
+#REINICIANDO O APACHE
+#
+service apache2 restart
+#
+#ACESSANDO MYSQL
+#
+mysql -u root -p123456
+#
+#CRIANDO O BANCO DE DADOS GLPI
+#
+create database glpi;
+#
+#CRIANDO USUARIO GLPI DE ACESSO AO DB
+#
+create user 'glpi'@'localhost' identified by '123456';
+#
+#PIRMISSÃO AO USUARIO GLPI A TODAS AS TABELAS DO BANCO DE DADOS GLPI
+#
+grant all on glpi.* to glpi with grant option;
+#
+#HABILITANDO AÇÕES AUTOMATICAS DO GLPI
+#
+vim /etc/cron
+*/5	* 	*	*	* root	/usr/bin/php5	/var/www/html/glpi/front/cron.php &> /dev/null
+#
+#RESTARTANDO O CRON
+#
+service cron restart
+#
+#SCRIP PARA INSTALAÇÃO DO GLPI
+#
+wget http://pillares.net/scripts/install-glpi.sh
+chmod +x install-glpi.sh
+./install-glpi.sh
+#
+#REMOVENDO INSTALLER.PHP GLPI
+#
+rm /var/www/html/glpi/install/install.php
+

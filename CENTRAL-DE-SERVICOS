@@ -22,6 +22,12 @@ apt-get upgrade -y
 apt-get install software-properties-common
 apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xcbcb082a1bb943db
 add-apt-repository 'deb [arch=amd64,i386] http://mirror.ufscar.br/mariadb/repo/10.1/debian jessie main'
+
+MariaDB 10.3
+apt-get install software-properties-common dirmngr
+apt-key adv --recv-keys --keyserver https://keyserver.ubuntu.com/pks/ 0xF1656F24C74CD1D8
+sudo add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://mirror.ufscar.br/mariadb/repo/10.3/debian stretch main'
+
 apt-get update
 #
 #INSTALANDO OS PACOTES NECESSARIOS PARA A EXECUÇÃO DO GLPI
